@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <script src="./JS/angular.min.js"></script>
+  </head>
+  <body>
+    <div ng-app="myApp" ng-init="showDiv=1" ng-controller="myCtl">
+      <div ng-switch="showDiv">
+        <div ng-switch-when="1">
+          <div ng-hide="hideInput">
+            Enter File Name : <input type="text" ng-model="fileName" />
+            <button ng-click="fileRun(fileName);">Upload</button>
+          </div>
+          <button ng-click="getGraphs()" ng-show="getButton">Get Graphs</button>
+        </div>
+        <div ng-switch-when="2" align="center">
+            <div ng-repeat="x in graphNames['names'] track by $index">
+              <img ng-src="./Resource/Graphs/{{x}}" height="700" width="1300"/>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var app = angular.module("myApp",[])
+      app.controller("myCtl",myCtlFunc);
+      myCtlFunc.$inject = ['$scope','$http','$window','$location']
+      function myCtlFunc($scope,$http,$window,$location){
+        $scope.fileName=" "
+        $scope.fileRun = function(fname){
+          var data2 = {
+            "fname" : fname
+          }
+          $scope.dataMain = JSON.stringify(data2)
+          $http.put("http://localhost:5000/fileRun",$scope.dataMain)
+          .then(putIsNoob);
+        }
+        var putIsNoob = function(response){
+            if ( response.data == 1 ){
+              $scope.getButton = !$scope.getButton;
+              $scope.hideInput = !$scope.hideInput;
+            }
+        }
+        $scope.getGraphs = function(){
+          $scope.showDiv=2
+          $http.get("http://localhost:5000/getGraphs")
+          .then(getGraphFileName)
+        }
+        var getGraphFileName = function(response){
+          $scope.graphNames = response.data;
+        }
+      };
+    </script>
+  </body>
+</html>
